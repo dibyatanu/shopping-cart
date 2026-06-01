@@ -50,6 +50,15 @@ public class CartServiceTest {
                     ,Fruits.ORANGES,Fruits.ORANGES);
             assertThat(actualCost, is(equalTo("£1.70")));
         }
+
+        @DisplayName("Should return £0.00 for empty basket")
+        @Test
+        void shouldReturnEmptyBasket() {
+            var cartService = new CartService();
+            var actualCost = cartService.checkOut(new Fruits[]{});
+            assertThat(actualCost, is(equalTo("0.00p")));
+
+        }
     }
 
     @Nested
