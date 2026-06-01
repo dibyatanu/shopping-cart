@@ -48,7 +48,7 @@ public class CartServiceTest {
             var cartService = new CartService();
             var actualCost = cartService.checkOut(Fruits.APPLE,Fruits.APPLE,Fruits.APPLE,Fruits.ORANGES
                     ,Fruits.ORANGES,Fruits.ORANGES);
-            assertThat(actualCost, is(equalTo("£1.95")));
+            assertThat(actualCost, is(equalTo("£1.70")));
         }
     }
 
@@ -57,7 +57,7 @@ public class CartServiceTest {
         @ParameterizedTest(name = "{0}")
         @MethodSource("appleOfferTestCases")
         @DisplayName("Should apply buy get one free on apples")
-        void shouldApplyAppleOfferCorrectly(String displayName, int appleCount, String expectedCost) {
+        void shouldApplyAppleOfferCorrectly(final String displayName,final  int appleCount,final  String expectedCost) {
             var cartService = new CartService();
             Fruits[] apples = Collections.nCopies(appleCount, Fruits.APPLE)
                     .toArray(Fruits[]::new);
@@ -74,5 +74,32 @@ public class CartServiceTest {
             );
         }
 
+
+        @DisplayName("Should apply 3 for the the price of two on oranges")
+        @ParameterizedTest(name = "{0}")
+        @MethodSource("orangesOfferTestCases")
+        void shouldApplyThreeForThePriceOfTwoOnOranges(final String displayName,final  int appleCount,final  String expectedCost) {
+            var cartService = new CartService();
+            Fruits[] apples = Collections.nCopies(appleCount, Fruits.ORANGES)
+                    .toArray(Fruits[]::new);
+            var actualCost = cartService.checkOut(apples);
+            assertThat(actualCost, is(equalTo(expectedCost)));
+        }
+
+
+        private static Stream<Arguments> orangesOfferTestCases() {
+            return Stream.of(
+                    Arguments.of("Should pay for 1 orange when I buy 1", 1, "0.25p"),
+                    Arguments.of("Should pay for 2 oranges when I buy 2", 2, "0.50p"),
+                    Arguments.of("Should pay for 2 oranges when I buy 3", 3, "0.50p"),
+                    Arguments.of("Should pay for 3 oranges when I buy 4", 4, "0.75p"),
+                    Arguments.of("Should pay for 4 oranges when I buy 5", 5, "£1.00"),
+                    Arguments.of("Should pay for 4 oranges when I buy 6", 6, "£1.00"),
+                    Arguments.of("Should pay for 5 oranges when I buy 7", 7, "£1.25")
+            );
+
+        }
     }
+
+
 }
