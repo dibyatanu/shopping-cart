@@ -37,7 +37,7 @@ public final class CartService {
         total += basket.entrySet()
                 .stream()
                 .map(applyOffers)
-                .mapToInt(entry -> entry.getKey().getUnitCost() * entry.getValue())
+                .mapToDouble(entry -> entry.getKey().getUnitCost() * entry.getValue())
                 .sum();
         return total;
     }
@@ -59,8 +59,8 @@ public final class CartService {
         int qty = entry.getValue();
         int groupsOfThree = qty / 3;
         int remainder = qty % 3;
-        int priceAfterDiscount =groupsOfThree * 2 + remainder;
-        entry.setValue(priceAfterDiscount);
+        int quantity =groupsOfThree * 2 + remainder;
+        entry.setValue(quantity);
     }
 
     private String formatCurrency(final double value) {
