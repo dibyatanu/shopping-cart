@@ -4,32 +4,66 @@ package uk.mercator.group;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+
 
 public final class CartService {
-    final private Map<Fruits,Integer> fruitBasket = new HashMap<>();
+
+    private final Function<Map.Entry<Fruits, Integer>, Map.Entry<Fruits, Integer>> applyOffers =
+            basket -> {
+                switch (basket.getKey()) {
+                    case APPLE -> applyOffersOnApple(basket);
+                    case ORANGES -> applyOffersOnOranges(basket);
+                }
+                return basket;
+            };
 
     public String checkOut(final Fruits... fruits) {
-        addToBasket(fruits);
-        double total = getTotal();
+        Map<Fruits,Integer> basket = buildBasket(fruits);
+        double total = calculateTotalPrice(basket);
         return formatCurrency(total/100);
     }
 
 
-    private void addToBasket(final Fruits... fruits) {
+    private Map<Fruits,Integer> buildBasket(final Fruits... fruits) {
+        Map<Fruits,Integer> basket = new HashMap<>();
         Arrays.stream(fruits)
-                .forEach(fruit -> fruitBasket.merge(fruit, 1, Integer::sum));
+                .forEach(fruit -> basket.merge(fruit, 1, Integer::sum));
+        return basket;
     }
 
-    private double getTotal() {
+    private double calculateTotalPrice(final Map<Fruits,Integer> basket) {
         double total = 0;
-        total += fruitBasket.entrySet()
+        total += basket.entrySet()
                 .stream()
-                .mapToInt(entry -> entry.getKey().getUnitCost() * entry.getValue())
+                .map(applyOffers)
+                .mapToDouble(entry -> entry.getKey().getUnitCost() * entry.getValue())
                 .sum();
         return total;
     }
 
-    public static String formatCurrency(double value) {
+    /**
+     * Applies buy one, get one apple free
+     * @param entry
+     */
+
+    private void applyOffersOnApple(final Map.Entry<Fruits, Integer> entry) {
+            entry.setValue((entry.getValue() + 1) / 2);
+    }
+
+    /**
+     * Applies 3 for the price of 2 on oranges
+     * @param entry
+     */
+    private  void applyOffersOnOranges(final Map.Entry<Fruits, Integer> entry) {
+        int qty = entry.getValue();
+        int groupsOfThree = qty / 3;
+        int remainder = qty % 3;
+        int quantity =groupsOfThree * 2 + remainder;
+        entry.setValue(quantity);
+    }
+
+    private String formatCurrency(final double value) {
         return (value >= 1)
                 ? String.format("£%.2f", value)
                 : String.format("%.2fp",value);
