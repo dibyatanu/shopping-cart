@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 public final class CartService {
@@ -26,10 +27,11 @@ public final class CartService {
 
 
     private Map<Fruits,Integer> buildBasket(final Fruits... fruits) {
-        Map<Fruits,Integer> basket = new HashMap<>();
-        Arrays.stream(fruits)
-                .forEach(fruit -> basket.merge(fruit, 1, Integer::sum));
-        return basket;
+        return Arrays.stream(fruits)
+                     .collect(Collectors.groupingBy(
+                             Function.identity(),
+                             Collectors.collectingAndThen(Collectors.counting(),Long::intValue)));
+
     }
 
     private double calculateTotalPrice(final Map<Fruits,Integer> basket) {
