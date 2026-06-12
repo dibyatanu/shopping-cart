@@ -2,15 +2,15 @@ package uk.mercator.group;
 
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 
 public final class CartService {
 
-    private final Function<Map.Entry<Fruits, Integer>, Map.Entry<Fruits, Integer>> applyOffers =
+    private final UnaryOperator<Map.Entry<Fruits, Integer>> applyOffers =
             basket -> {
                 switch (basket.getKey()) {
                     case APPLE -> applyOffersOnApple(basket);
@@ -18,6 +18,9 @@ public final class CartService {
                 }
                 return basket;
             };
+
+    private final Function<Map.Entry<Fruits,Integer>, Double> calculateItemCost =
+            basket -> (double) (basket.getKey().getUnitCost() * basket.getValue());
 
     public String checkOut(final Fruits... fruits) {
         Map<Fruits,Integer> basket = buildBasket(fruits);
@@ -38,8 +41,8 @@ public final class CartService {
         double total = 0;
         total += basket.entrySet()
                 .stream()
-                .map(applyOffers)
-                .mapToDouble(entry -> entry.getKey().getUnitCost() * entry.getValue())
+                .map(applyOffers.andThen(calculateItemCost))
+                .mapToDouble(Double::doubleValue)
                 .sum();
         return total;
     }
